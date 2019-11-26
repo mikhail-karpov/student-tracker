@@ -31,13 +31,10 @@ public class JdbcStudentDao implements StudentDao {
         if (student.getId() != null)
             throw new IllegalArgumentException("Student is already created. Student ID is not null");
 
-        String sql = "INSERT INTO student " +
-                "(first_name, last_name, email) " +
-                "values (?, ?, ?)";
-
+        String sql = "INSERT INTO student (first_name, last_name, email) values (?, ?, ?)";
 
         try (Connection connection = getConnection();
-            PreparedStatement statement = connection.prepareStatement(sql);){
+            PreparedStatement statement = connection.prepareStatement(sql)){
 
             statement.setString(1, student.getFirstName());
             statement.setString(2, student.getLastName());
@@ -50,18 +47,61 @@ public class JdbcStudentDao implements StudentDao {
     }
 
     @Override
-    public void delete(Student student) {
+    public void delete(Long id) throws DaoException {
+        String sql = "DELETE FROM student WHERE id=?";
 
+        try (Connection connection = getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setLong(1, id);
+            statement.execute();
+
+        } catch (SQLException e) {
+            throw new DaoException(e);
+        }
     }
 
     @Override
-    public void edit(Student student) {
+    public void edit(Student student) throws IllegalArgumentException, DaoException {
+        if (student.getId() == null)
+            throw new IllegalArgumentException("Student is not yet created. Student ID is null");
 
+        String sql = "UPDATE student SET first_name=?, last_name=?, email=? WHERE id=?";
+
+        try (Connection connection = getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setString(1, student.getFirstName());
+            statement.setString(2, student.getLastName());
+            statement.setString(3, student.getEmail());
+            statement.setLong(4, student.getId());
+            statement.execute();
+
+        } catch (SQLException e) {
+            throw new DaoException(e);
+        }
     }
 
     @Override
-    public Student get(Long id) {
-        return null;
+    public Student get(Long id) throws DaoException {
+        Student student = null;
+        String sql = "SELECT * FROM student WHERE id=?";
+
+        try (Connection connection = getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setLong(1, id);
+            ResultSet resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                student = map(resultSet);
+            }
+            resultSet.close();
+
+        } catch (SQLException e) {
+            throw new DaoException(e);
+        }
+
+        return student;
     }
 
     @Override

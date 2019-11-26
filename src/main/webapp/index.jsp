@@ -23,7 +23,20 @@
             <td>${student.firstName}</td>
             <td>${student.lastName}</td>
             <td>${student.email}</td>
-            <td>Edit | Delete</td>
+<%--            <td>Edit | Delete</td>--%>
+            <td>
+                <form action="students" method="post">
+                    <input type="hidden" name="command" value="LOAD"/>
+                    <input type="hidden" name="studentId" value="${student.id}"/>
+                    <input type="submit" value="Edit"/>
+                </form>
+                &nbsp;|&nbsp;
+                <form action="students" method="post">
+                    <input type="hidden" name="command" value="DELETE"/>
+                    <input type="hidden" name="studentId" value="${student.id}"/>
+                    <input type="submit" value="Delete"/>
+                </form>
+            </td>
         </tr>
     </c:forEach>
 </table>
