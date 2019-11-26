@@ -27,8 +27,26 @@ public class JdbcStudentDao implements StudentDao {
     // StudentDao implementation ---------------------------------------------------------------------------------------
 
     @Override
-    public void add(Student student) {
+    public void add(Student student) throws IllegalArgumentException, DaoException {
+        if (student.getId() != null)
+            throw new IllegalArgumentException("Student is already created. Student ID is not null");
 
+        String sql = "INSERT INTO student " +
+                "(first_name, last_name, email) " +
+                "values (?, ?, ?)";
+
+
+        try (Connection connection = getConnection();
+            PreparedStatement statement = connection.prepareStatement(sql);){
+
+            statement.setString(1, student.getFirstName());
+            statement.setString(2, student.getLastName());
+            statement.setString(3, student.getEmail());
+            statement.execute();
+
+        } catch (SQLException e) {
+            throw new DaoException(e);
+        }
     }
 
     @Override

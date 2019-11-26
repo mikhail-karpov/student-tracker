@@ -28,4 +28,31 @@ public class StudentControllerServlet extends HttpServlet {
         request.setAttribute("students", students);
         request.getRequestDispatcher("index.jsp").forward(request, response);
     }
+
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String command = request.getParameter("command");
+
+        if (command == null)
+            command = "LIST";
+
+        switch (command) {
+            case "ADD":
+                String firstName = request.getParameter("firstName");
+                String lastName = request.getParameter("lastName");
+                String email = request.getParameter("email");
+
+                Student student = new Student();
+                student.setFirstName(firstName);
+                student.setLastName(lastName);
+                student.setEmail(email);
+
+                studentDao.add(student);
+                doGet(request, response);
+                break;
+            case "LIST":
+                doGet(request, response);
+                break;
+        }
+    }
 }
