@@ -67,9 +67,9 @@ public class JdbcStudentDao implements StudentDao {
     }
 
     // Helpers ----------------------------------------------------------------------------------------------------
-    private static final String URL = "jdbc:mysql://localhost:3306/mydbtest";
+    private static final String URL = "jdbc:mysql://localhost:3306/mydbtest?useLegacyDatetimeCode=false&serverTimezone=UTC";
     private static final String USER = "root";
-    private static final String PASSWORD = "rootpassword";
+    private static final String PASSWORD = "RuC1jNab";
 
     private Connection getConnection() throws SQLException {
         return DriverManager.getConnection(URL, USER, PASSWORD);
