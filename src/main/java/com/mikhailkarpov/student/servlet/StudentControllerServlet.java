@@ -1,5 +1,6 @@
 package com.mikhailkarpov.student.servlet;
 
+import com.mikhailkarpov.student.dao.DaoException;
 import com.mikhailkarpov.student.dao.JdbcStudentDao;
 import com.mikhailkarpov.student.dao.StudentDao;
 import com.mikhailkarpov.student.model.Student;
@@ -20,7 +21,11 @@ public class StudentControllerServlet extends HttpServlet {
 
     @Override
     public void init() throws ServletException {
-        studentDao = JdbcStudentDao.getInstance();
+        try {
+            studentDao = JdbcStudentDao.getInstance();
+        } catch (DaoException e) {
+            throw new ServletException(e);
+        }
     }
 
     @Override
@@ -29,9 +34,14 @@ public class StudentControllerServlet extends HttpServlet {
     }
 
     private void listStudents(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        List<Student> students = studentDao.getAll();
-        request.setAttribute("students", students);
-        request.getRequestDispatcher(PATH + "list-students.jsp").forward(request, response);
+        try {
+            List<Student> students = studentDao.getAll();
+            request.setAttribute("students", students);
+            request.getRequestDispatcher(PATH + "list-students.jsp").forward(request, response);
+
+        } catch (DaoException e) {
+            throw new ServletException(e);
+        }
     }
 
     @Override
@@ -40,28 +50,35 @@ public class StudentControllerServlet extends HttpServlet {
         if (command == null)
             command = "DEFAULT";
 
-        switch (command) {
-            case "ADD":
-                Student student = getStudentFromRequest(request);
-                studentDao.add(student);
-                listStudents(request, response);
-                break;
-            case "DELETE":
-                String idString = request.getParameter("studentId");
-                Long id = Long.parseLong(idString);
-                studentDao.delete(id);
-                listStudents(request, response);
-                break;
-            case "EDIT":
-                editStudent(request);
-                listStudents(request, response);
-                break;
-            case "LOAD":
-                loadStudent(request, response);
-                break;
-            default:
-                listStudents(request, response);
-                break;
+        if (command.equals("ADD")) {
+            addStudent(request);
+            listStudents(request, response);
+        }
+        else if (command.equals("DELETE")) {
+            deleteStudent(request);
+            listStudents(request, response);
+        }
+        else if (command.equals("EDIT")) {
+            editStudent(request);
+            listStudents(request, response);
+        }
+        else if (command.equals("LOAD")) {
+            Student student = loadStudentFromDB(request);
+            request.setAttribute("student", student);
+            request.getRequestDispatcher(PATH + "edit-student.jsp").forward(request, response);
+        }
+        else {
+            listStudents(request, response);
+        }
+    }
+
+    private void addStudent(HttpServletRequest request) throws ServletException {
+        try {
+            Student student = getStudentFromRequest(request);
+            studentDao.add(student);
+
+        } catch (DaoException e) {
+            throw new ServletException(e);
         }
     }
 
@@ -77,20 +94,38 @@ public class StudentControllerServlet extends HttpServlet {
         return student;
     }
 
-    private void loadStudent(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        String idString = request.getParameter("studentId");
-        Long id = Long.parseLong(idString);
-        Student student = studentDao.get(id);
+    private void deleteStudent(HttpServletRequest request) throws ServletException {
+        try {
+            String idString = request.getParameter("studentId");
+            Long id = Long.parseLong(idString);
+            studentDao.delete(id);
 
-        request.setAttribute("student", student);
-        request.getRequestDispatcher(PATH + "edit-student.jsp").forward(request, response);
+        } catch (DaoException | IllegalArgumentException e) {
+            throw new ServletException(e);
+        }
     }
 
-    private void editStudent(HttpServletRequest request) {
-        Student student = getStudentFromRequest(request);
-        String idString = request.getParameter("studentId");
-        Long id = Long.parseLong(idString);
-        student.setId(id);
-        studentDao.edit(student);
+    private Student loadStudentFromDB(HttpServletRequest request) throws ServletException {
+        try {
+            String idString = request.getParameter("studentId");
+            Long id = Long.parseLong(idString);
+            return studentDao.get(id);
+
+        } catch (DaoException | IllegalArgumentException e) {
+            throw new ServletException(e);
+        }
+    }
+
+    private void editStudent(HttpServletRequest request) throws ServletException {
+        try {
+            Student student = getStudentFromRequest(request);
+            String idString = request.getParameter("studentId");
+            Long id = Long.parseLong(idString);
+            student.setId(id);
+            studentDao.edit(student);
+
+        } catch (DaoException | IllegalArgumentException e) {
+            throw new ServletException(e);
+        }
     }
 }

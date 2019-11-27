@@ -2,7 +2,7 @@ package com.mikhailkarpov.student.dao;
 
 import java.sql.SQLException;
 
-public class DaoException extends RuntimeException {
+public class DaoException extends Exception {
 
     public DaoException(String message) {
         super(message);

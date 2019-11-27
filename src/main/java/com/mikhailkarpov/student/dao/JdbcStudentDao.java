@@ -10,14 +10,14 @@ public class JdbcStudentDao implements StudentDao {
 
     private static  JdbcStudentDao instance;
 
-    public static JdbcStudentDao getInstance() {
+    public static JdbcStudentDao getInstance() throws DaoException {
         try {
             if (instance == null) {
                 instance = new JdbcStudentDao();
                 Class.forName("com.mysql.cj.jdbc.Driver");
             }
         } catch (ClassNotFoundException e) {
-            e.printStackTrace();
+            throw new DaoException(e);
         }
         return instance;
     }
