@@ -6,8 +6,8 @@
 <body>
 <h2>Student List</h2>
 
-<input type="button" value="Add student" onclick="window.location.href='add-student.jsp'; return false"/>
-
+<%--<input type="button" value="Add student" onclick="window.location.href='/WEB-INF/view/add-student.jsp'; return false"/>--%>
+<a href="add-student.jsp">Add student</a>
 <table>
     <tr>
         <th>id</th>

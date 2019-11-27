@@ -15,6 +15,7 @@ import java.util.List;
 @WebServlet("/students")
 public class StudentControllerServlet extends HttpServlet {
 
+    private static final String PATH = "";
     private StudentDao studentDao;
 
     @Override
@@ -30,7 +31,7 @@ public class StudentControllerServlet extends HttpServlet {
     private void listStudents(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         List<Student> students = studentDao.getAll();
         request.setAttribute("students", students);
-        request.getRequestDispatcher("index.jsp").forward(request, response);
+        request.getRequestDispatcher(PATH + "list-students.jsp").forward(request, response);
     }
 
     @Override
@@ -82,7 +83,7 @@ public class StudentControllerServlet extends HttpServlet {
         Student student = studentDao.get(id);
 
         request.setAttribute("student", student);
-        request.getRequestDispatcher("edit-student.jsp").forward(request, response);
+        request.getRequestDispatcher(PATH + "edit-student.jsp").forward(request, response);
     }
 
     private void editStudent(HttpServletRequest request) {
