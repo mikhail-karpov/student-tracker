@@ -2,27 +2,19 @@ package com.mikhailkarpov.student.dao;
 
 import com.mikhailkarpov.student.model.Student;
 
+import javax.sql.DataSource;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class JdbcStudentDao implements StudentDao {
 
-    private static  JdbcStudentDao instance;
+    // Field(s) and Constructor(s) -------------------------------------------------------------------------------------
+    private DataSource dataSource;
 
-    public static JdbcStudentDao getInstance() throws DaoException {
-        try {
-            if (instance == null) {
-                instance = new JdbcStudentDao();
-                Class.forName("com.mysql.cj.jdbc.Driver");
-            }
-        } catch (ClassNotFoundException e) {
-            throw new DaoException(e);
-        }
-        return instance;
+    public JdbcStudentDao(DataSource dataSource) {
+        this.dataSource = dataSource;
     }
-
-    private JdbcStudentDao() {}
 
     // StudentDao implementation ---------------------------------------------------------------------------------------
 
@@ -34,7 +26,7 @@ public class JdbcStudentDao implements StudentDao {
         String sql = "INSERT INTO student (first_name, last_name, email) values (?, ?, ?)";
 
         try (Connection connection = getConnection();
-            PreparedStatement statement = connection.prepareStatement(sql)){
+             PreparedStatement statement = connection.prepareStatement(sql)){
 
             statement.setString(1, student.getFirstName());
             statement.setString(2, student.getLastName());
@@ -124,13 +116,10 @@ public class JdbcStudentDao implements StudentDao {
         return students;
     }
 
-    // Helpers ----------------------------------------------------------------------------------------------------
-    private static final String URL = "jdbc:mysql://localhost:3306/mydbtest?useLegacyDatetimeCode=false&serverTimezone=UTC";
-    private static final String USER = "root";
-    private static final String PASSWORD = "RuC1jNab";
+    // Helpers methods -------------------------------------------------------------------------------------------------
 
     private Connection getConnection() throws SQLException {
-        return DriverManager.getConnection(URL, USER, PASSWORD);
+        return this.dataSource.getConnection();
     }
 
     private Student map(ResultSet resultSet) throws SQLException {

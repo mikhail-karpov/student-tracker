@@ -5,27 +5,26 @@ import com.mikhailkarpov.student.dao.JdbcStudentDao;
 import com.mikhailkarpov.student.dao.StudentDao;
 import com.mikhailkarpov.student.model.Student;
 
+import javax.annotation.Resource;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.sql.DataSource;
 import java.io.IOException;
 import java.util.List;
 
 @WebServlet("/students")
 public class StudentControllerServlet extends HttpServlet {
 
-    private static final String PATH = "";
+    @Resource(name = "jdbc/studentdb")
+    private DataSource dataSource;
     private StudentDao studentDao;
 
     @Override
     public void init() throws ServletException {
-        try {
-            studentDao = JdbcStudentDao.getInstance();
-        } catch (DaoException e) {
-            throw new ServletException(e);
-        }
+        studentDao = new JdbcStudentDao(dataSource);
     }
 
     @Override
@@ -37,7 +36,7 @@ public class StudentControllerServlet extends HttpServlet {
         try {
             List<Student> students = studentDao.getAll();
             request.setAttribute("students", students);
-            request.getRequestDispatcher(PATH + "list-students.jsp").forward(request, response);
+            request.getRequestDispatcher("list-students.jsp").forward(request, response);
 
         } catch (DaoException e) {
             throw new ServletException(e);
@@ -65,7 +64,7 @@ public class StudentControllerServlet extends HttpServlet {
         else if (command.equals("LOAD")) {
             Student student = loadStudentFromDB(request);
             request.setAttribute("student", student);
-            request.getRequestDispatcher(PATH + "edit-student.jsp").forward(request, response);
+            request.getRequestDispatcher("edit-student.jsp").forward(request, response);
         }
         else {
             listStudents(request, response);
